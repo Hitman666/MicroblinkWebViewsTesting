@@ -18,6 +18,9 @@ import androidx.core.app.ActivityCompat
 
 class MainActivity : AppCompatActivity() {
     private val CAMERA_PERMISSION_REQUEST_CODE = 100
+    private val AUDIO_PERMISSION_REQUEST_CODE = 101
+    private val MODIFY_AUDIO_SETTINGS_REQUEST_CODE = 102
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,32 @@ class MainActivity : AppCompatActivity() {
                 CAMERA_PERMISSION_REQUEST_CODE
             )
         } else {
+            checkAndRequestAudioPermissions()
+        }
+    }
+
+    private fun checkAndRequestAudioPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.MODIFY_AUDIO_SETTINGS)
+            != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            // Request missing permissions
+            ActivityCompat.requestPermissions(
+                this,
+                permissionsToRequest.toTypedArray(),
+                AUDIO_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // All necessary permissions are granted, set up WebView
             setupWebView()
         }
     }
@@ -61,11 +90,33 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupWebView()
-            } else {
-                Toast.makeText(this, "Camera permission is required", Toast.LENGTH_LONG).show()
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted for camera, check audio permissions
+                    checkAndRequestAudioPermissions()
+                } else {
+                    // Camera permission denied
+                    Toast.makeText(this, "Camera permission is required", Toast.LENGTH_LONG).show()
+                }
+            }
+            AUDIO_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted for audio, now check MODIFY_AUDIO_SETTINGS
+                    checkAndRequestAudioPermissions()
+                } else {
+                    // Audio permission denied
+                    Toast.makeText(this, "Audio permission is required", Toast.LENGTH_LONG).show()
+                }
+            }
+            MODIFY_AUDIO_SETTINGS_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted for modifying audio settings, set up WebView
+                    setupWebView()
+                } else {
+                    // MODIFY_AUDIO_SETTINGS permission denied
+                    Toast.makeText(this, "Permission to modify audio settings is required", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
