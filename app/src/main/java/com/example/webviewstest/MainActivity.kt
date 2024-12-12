@@ -13,8 +13,11 @@ import androidx.core.content.ContextCompat
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+
+import android.webkit.WebChromeClient
 
 class MainActivity : AppCompatActivity() {
     private val CAMERA_PERMISSION_REQUEST_CODE = 100
@@ -74,12 +77,53 @@ class MainActivity : AppCompatActivity() {
 
     // Set up WebView to load the URL
     private fun setupWebView() {
+        // Find WebView by ID
         val webView: WebView = findViewById(R.id.webView)
 
+        // Enable JavaScript
         val webSettings: WebSettings = webView.settings
         webSettings.javaScriptEnabled = true
 
+        // Set WebViewClient to handle navigation
         webView.webViewClient = WebViewClient()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
+
+        // Set WebChromeClient to handle permissions
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: android.webkit.PermissionRequest?) {
+                // Handle permission requests for camera and microphone
+                if (request != null) {
+                    if (request.resources.contains(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
+                        if (ContextCompat.checkSelfPermission(
+                                this@MainActivity, Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED) {
+                            request.grant(request.resources)
+                        } else {
+                            ActivityCompat.requestPermissions(
+                                this@MainActivity,
+                                arrayOf(Manifest.permission.CAMERA),
+                                CAMERA_PERMISSION_REQUEST_CODE
+                            )
+                        }
+                    } else if (request.resources.contains(android.webkit.PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
+                        if (ContextCompat.checkSelfPermission(
+                                this@MainActivity, Manifest.permission.RECORD_AUDIO
+                            ) == PackageManager.PERMISSION_GRANTED) {
+                            request.grant(request.resources)
+                        } else {
+                            ActivityCompat.requestPermissions(
+                                this@MainActivity,
+                                arrayOf(Manifest.permission.RECORD_AUDIO),
+                                AUDIO_PERMISSION_REQUEST_CODE
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         webView.loadUrl("https://blinkid-test.netlify.app/")
     }
