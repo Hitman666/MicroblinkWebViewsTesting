@@ -38,7 +38,7 @@ if(request.resources.contains(android.webkit.PermissionRequest.RESOURCE_VIDEO_CA
 }
 ```
 
-There’s also the ‘else’ part of that branch that checks for the android.webkit.PermissionRequest.RESOURCE_AUDIO_CAPTURE permission, but you can check that in the code [here](https://github.com/Hitman666/MicroblinkWebViewsTesting/blob/main/app/src/main/java/com/example/webviewstest/MainActivity.kt#L111C59-L111C114).
+There’s also the ‘else’ part of that branch that checks for the `android.webkit.PermissionRequest.RESOURCE_AUDIO_CAPTURE` permission, but you can check that in the code [here](https://github.com/Hitman666/MicroblinkWebViewsTesting/blob/main/app/src/main/java/com/example/webviewstest/MainActivity.kt#L111C59-L111C114).
 
 ## Conclusion
 Hope this helps, and if you'll have any additional questions, please [reach out](https://microblink.com/contact-us/) to us and we'll be happy to help.
